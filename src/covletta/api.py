@@ -51,7 +51,7 @@ app.add_middleware(
 )
 
 ## TODO: ADD OPEN AI API KEY
-openai.api_key = ""
+openai.api_key = "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"
 
 
 @app.get("/")
