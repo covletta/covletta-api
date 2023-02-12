@@ -1,13 +1,14 @@
 import io
+import json
 import logging
 import os
-import json
 
 import openai
 import PyPDF2
-from fastapi import FastAPI, File, HTTPException, UploadFile, Depends
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
 
 class ModelInputs(BaseModel):
     job_ad_text: str = None
@@ -50,7 +51,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-## TODO: ADD OPEN AI API KEY
+# TODO: ADD OPEN AI API KEY
 openai.api_key = "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"
 
 
@@ -66,14 +67,14 @@ async def upload_file_and_read(
     allowed_contents = ["pdf", "officedocument"]
     if not any(x in cv_file.content_type for x in allowed_contents):
         raise HTTPException(
-            status_code=400, detail=f"File '{cv_file.filename}' is not a valid document."
+            status_code=400,
+            detail=f"File '{cv_file.filename}' is not a valid document.",
         )
 
     content = await cv_file.read()
     document = io.BytesIO(content)
     pdf = PyPDF2.PdfReader(document)
     cv_string = parse_pdf(pdf)
-
 
     prompt = f""" The following is my resume:\n {cv_string}.\n\n
     Please write a fitting cover letter for the following job ad:\n\n
@@ -91,12 +92,12 @@ async def upload_file_and_read(
 
     letter_raw_text = response["choices"][0]["text"]
 
-
     response = {
-        "raw":  json.dumps(letter_raw_text, ensure_ascii=False),
+        "raw": json.dumps(letter_raw_text, ensure_ascii=False),
     }
 
     return response
+
 
 def parse_pdf(pdf):
     output = ""
